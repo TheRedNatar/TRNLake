@@ -1,0 +1,76 @@
+defmodule TLake.GenLauncher do
+  use GenServer
+
+  @launch_time ~T[00:08:00]
+  @relaunch_interval 1000 * 60 * 3
+  @hour_in_milis 1000 * 60 * 60
+  @day_in_milis 1000 * 60 * 60 * 24
+
+  @spec start_link() :: GenServer.on_start()
+  def start_link(), do: GenServer.start_link(__MODULE__, [], name: __MODULE__)
+
+  @impl true
+  def init(_) do
+    {:ok, %{tref: nil}, {:continue, :init_start}}
+  end
+
+  @impl true
+  def handle_continue(:init_start, state) do
+    launch_and_wait(state)
+  end
+
+  @impl true
+  def handle_info(:launch_now, state) do
+    launch_and_wait(state)
+  end
+
+  def handle_info(_msg, state) do
+    {:noreply, state}
+  end
+
+  defp launch_and_wait(state) do
+    root_path = Application.fetch_env!(:t_lake, :root_path)
+    utc_1_date = utc_1_date()
+
+    case :travianmap.get_servers() do
+      {:error, _reason} = _error ->
+        tref = :erlang.send_after(@relaunch_interval, self(), :launch_now)
+        {:noreply, %{state | tref: tref}}
+
+      {:ok, servers} ->
+        valid_servers = Enum.filter(servers, fn {atom, _} -> atom == :ok end)
+
+        Enum.each(valid_servers, fn {_, server_map} ->
+          launch_job(root_path, utc_1_date, server_map)
+        end)
+
+        tref = :erlang.send_after(milis_to_next_launch(@launch_time), self(), :launch_now)
+        {:noreply, %{state | tref: tref}}
+    end
+  end
+
+  @spec milis_to_next_launch(launch_time :: Time.t()) :: integer()
+  def milis_to_next_launch(launch_time) do
+    utc_1_now = DateTime.utc_now() |> DateTime.add(@hour_in_milis, :millisecond)
+
+    case Time.diff(launch_time, DateTime.to_time(utc_1_now), :millisecond) do
+      0 -> 0
+      x when x > 0 -> x
+      x when x < 0 -> @day_in_milis + x
+    end
+  end
+
+  defp utc_1_date() do
+    DateTime.utc_now()
+    |> DateTime.add(@hour_in_milis, :millisecond)
+    |> DateTime.to_date()
+  end
+
+  @spec launch_job(root_path :: String.t(), utc_1_date :: Date.t(), server_map :: map()) ::
+          DynamicSupervisor.on_start_child()
+  def launch_job(root_path, utc_1_date, server_map) do
+    Task.Supervisor.start_child(TLake.TaskSupervisor, fn ->
+      TLake.Job.DAG.start(root_path, utc_1_date, server_map)
+    end)
+  end
+end
