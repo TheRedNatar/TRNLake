@@ -38,11 +38,10 @@ defmodule TLake.GenLauncher do
         {:noreply, %{state | tref: tref}}
 
       {:ok, servers} ->
-        valid_servers = Enum.filter(servers, fn {atom, _} -> atom == :ok end)
+        server_maps =
+          for {atom, server_map} <- servers, atom == :ok, do: {root_path, utc_1_date, server_map}
 
-        Enum.each(valid_servers, fn {_, server_map} ->
-          launch_job(root_path, utc_1_date, server_map)
-        end)
+        TLake.TaskProducer.send_bulk_server_maps(Enum.shuffle(server_maps))
 
         tref = :erlang.send_after(milis_to_next_launch(@launch_time), self(), :launch_now)
         {:noreply, %{state | tref: tref}}

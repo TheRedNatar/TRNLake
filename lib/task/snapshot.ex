@@ -1,10 +1,5 @@
 defmodule TLake.Job.Snapshot do
-  alias Explorer.DataFrame
-  alias Explorer.Series
   require Explorer.DataFrame, as: DF
-
-  alias TLake.Job.Utils
-  alias TLake.Job.RawSnapshot
 
   def table_name(), do: "snapshot"
   def table_name_error(), do: "snapshot_error"
@@ -65,13 +60,15 @@ defmodule TLake.Job.Snapshot do
     ]
   end
 
-  # aws_path, server_map
-  def run(f_filename, target_date, server_id, _opts) do
+  def run(f_filename, target_date, _server_id, _opts) do
     with(
-      {:ok, df_input} <- DF.from_parquet(f_filename.(RawSnapshot.table_name())),
+      {:ok, input_filename} <- f_filename.({TLake.Job.RawSnapshot.table_name(), target_date}),
+      {:ok, df_input} <- DF.from_parquet(input_filename),
       {df_ok, df_error} = process(df_input),
-      :ok <- DF.to_parquet(df_ok, f_filename.(table_name())),
-      :ok <- DF.to_parquet(df_error, f_filename.(table_name_error()))
+      {:ok, output_ok_filename} <- f_filename.({table_name(), target_date}),
+      {:ok, output_error_filename} <- f_filename.({table_name_error(), target_date}),
+      :ok <- DF.to_parquet(df_ok, output_ok_filename),
+      :ok <- DF.to_parquet(df_error, output_error_filename)
     ) do
       :ok
     end
@@ -99,10 +96,6 @@ defmodule TLake.Job.Snapshot do
       {:ok, new_row} -> Map.merge(row, new_row) |> Map.merge(%{"parse_ok?" => true})
       _ -> Map.merge(row, fake_nil_map()) |> Map.merge(%{"parse_ok?" => false})
     end
-  end
-
-  defp parse_raw_snapshot(raw_snapshot) do
-    for {atom, row} <- :travianmap.parse_map(raw_snapshot), atom == :ok, do: row
   end
 
   defp fake_nil_map() do

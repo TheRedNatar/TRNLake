@@ -1,23 +1,10 @@
 defmodule TLake.Job.Utils do
-  alias Explorer.DataFrame
   alias Explorer.Series
   require Explorer.DataFrame, as: DF
 
   @spec gen_server_id(server_url :: String.t(), server_starting_date :: Date.t()) :: binary()
   def gen_server_id(<<"https://", server_url::binary>>, server_starting_date) do
     "#{server_url}_#{Date.to_iso8601(server_starting_date, :basic)}"
-  end
-
-  @spec partitioned_path(root_path :: String.t(), attrs :: [{atom(), String.t()}, ...]) ::
-          {:ok, String.t()} | {:error, File.posix()}
-  def partitioned_path(root_path, attrs) do
-    partitions = for {att, value} <- attrs, do: "#{att}=#{value}"
-    path = Enum.join([root_path] ++ partitions, "/")
-
-    case File.mkdir_p(path) do
-      :ok -> {:ok, path}
-      error -> error
-    end
   end
 
   def lit(value) do
@@ -36,28 +23,44 @@ defmodule TLake.Job.Utils do
             access_key_id: String.t(),
             secret_access_key: String.t()
           },
-          server_id :: String.t(),
-          target_date :: Date.t()
+          server_id :: String.t()
         ) ::
-          (String.t() -> {:ok, FSS.entry()} | {:error, atom()})
-  def f_filename(root_path, aws_config, server_id, target_date) do
-    partitioned_path = Path.join(["server_id=#{server_id}", "target_date=#{target_date}"])
-
+          ({String.t(), Date.t()} | {:aws, String.t(), Date.t()} ->
+             {:ok, FSS.entry()} | {:error, atom()})
+  def f_filename(root_path, aws_config, server_id) do
     fn
-      {:aws, table_name} ->
+      {:aws, table_name, target_date} ->
         endpoint =
-          "s3://#{aws_config[:bucket]}/#{String.replace(partitioned_path, "=", "___")}/#{table_name}.parquet"
+          "s3://#{aws_config[:bucket]}/#{String.replace(partitioned_path(server_id, target_date), "=", "___")}/#{table_name}.parquet"
 
         FSS.S3.parse(endpoint, config: Map.to_list(aws_config))
 
-      table_name ->
-        dir_path = Path.join([root_path, partitioned_path])
+      {table_name, target_date} ->
+        dir_path = Path.join([root_path, partitioned_path(server_id, target_date)])
         path = Path.join([dir_path, "#{table_name}.parquet"])
 
         case File.mkdir_p(dir_path) do
           :ok -> {:ok, FSS.Local.from_path(path)}
           error -> error
         end
+    end
+  end
+
+  defp partitioned_path(server_id, target_date) do
+    Path.join(["server_id=#{server_id}", "target_date=#{target_date}"])
+  end
+
+  def read_parquets(f_filename, table_name, dates) do
+    dates
+    |> Enum.map(&read_parquet(f_filename, table_name, &1))
+    |> Enum.filter(fn {atom, _} -> atom == :ok end)
+    |> Enum.map(fn {_, df} -> df end)
+  end
+
+  defp read_parquet(f_filename, table_name, date) do
+    case f_filename.(table_name, date) do
+      {:ok, filename} -> DF.from_parquet(filename, lazy: true)
+      error -> error
     end
   end
 end

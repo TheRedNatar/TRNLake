@@ -15,10 +15,14 @@ defmodule TLake.Application do
       :type => :worker
     }
 
+    task_consumer = {TLake.TaskConsumer, Application.fetch_env!(:t_lake, :max_demand)}
+    task_producer = {TLake.TaskProducer, []}
+
     children = [
       # Starts a worker by calling: TLake.Worker.start_link(arg)
       # {TLake.Worker, arg}
-      {Task.Supervisor, name: TLake.TaskSupervisor},
+      task_producer,
+      task_consumer,
       gen_launcher
     ]
 
