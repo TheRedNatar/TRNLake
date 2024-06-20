@@ -1,6 +1,8 @@
 defmodule TLake.TaskConsumer do
   use ConsumerSupervisor
 
+  @moduledoc false
+
   def start_link(max_demand) do
     ConsumerSupervisor.start_link(__MODULE__, max_demand, name: __MODULE__)
   end

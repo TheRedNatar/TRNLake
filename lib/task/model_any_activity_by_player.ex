@@ -4,6 +4,8 @@ defmodule TLake.Job.ModelAnyActivityByPlayer do
   alias TLake.Job.Utils
   require Explorer.DataFrame, as: DF
 
+  @moduledoc false
+
   def schema() do
     [
       {"server_id", :string},
@@ -13,7 +15,7 @@ defmodule TLake.Job.ModelAnyActivityByPlayer do
     ]
   end
 
-  def run(f_filename, target_date, server_id, %{n_days: n_days}) do
+  def run(f_filename, target_date, _server_id, %{n_days: n_days}) do
     dfs =
       [df_daily | _] =
       Utils.read_parquets(
@@ -41,25 +43,27 @@ defmodule TLake.Job.ModelAnyActivityByPlayer do
       |> DF.join(df_activity, on: ["player_id"], how: :left)
       |> DF.collect()
 
-    model = 1
+    df
 
-    prediction = EXGBoost.predict(model, to_tensor(df))
+    # model = 1
 
-    df_output =
-      df
-      |> DF.mutate_with(fn _ldf ->
-        [
-          server_id: Utils.lit(server_id, :binary),
-          target_date: Utils.lit(target_date, :date),
-          prediction_any_increase?: Series.from_tensor(prediction, :f32)
-        ]
-      end)
-      |> DF.select([
-        "server_id",
-        "target_date",
-        "player_id",
-        "prediction_any_increase?"
-      ])
+    # prediction = EXGBoost.predict(model, to_tensor(df))
+
+    # df_output =
+    #   df
+    #   |> DF.mutate_with(fn _ldf ->
+    #     [
+    #       server_id: Utils.lit(server_id, :binary),
+    #       target_date: Utils.lit(target_date, :date),
+    #       prediction_any_increase?: Series.from_tensor(prediction, :f32)
+    #     ]
+    #   end)
+    #   |> DF.select([
+    #     "server_id",
+    #     "target_date",
+    #     "player_id",
+    #     "prediction_any_increase?"
+    #   ])
   end
 
   defp to_tensor(df) do

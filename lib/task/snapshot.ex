@@ -1,6 +1,8 @@
 defmodule TLake.Job.Snapshot do
   require Explorer.DataFrame, as: DF
 
+  @moduledoc false
+
   def table_name(), do: "snapshot"
   def table_name_error(), do: "snapshot_error"
   def partitions(server_id, target_date), do: [server_id: server_id, target_date: target_date]
@@ -67,10 +69,9 @@ defmodule TLake.Job.Snapshot do
       {df_ok, df_error} = process(df_input),
       {:ok, output_ok_filename} <- f_filename.({table_name(), target_date}),
       {:ok, output_error_filename} <- f_filename.({table_name_error(), target_date}),
-      :ok <- DF.to_parquet(df_ok, output_ok_filename),
       :ok <- DF.to_parquet(df_error, output_error_filename)
     ) do
-      :ok
+      DF.to_parquet(df_ok, output_ok_filename)
     end
   end
 

@@ -1,6 +1,8 @@
 defmodule TLake.GenLauncher do
   use GenServer
 
+  @moduledoc false
+
   @launch_time ~T[00:08:00]
   @relaunch_interval 1000 * 60 * 3
   @hour_in_milis 1000 * 60 * 60
@@ -31,6 +33,9 @@ defmodule TLake.GenLauncher do
   defp launch_and_wait(state) do
     root_path = Application.fetch_env!(:t_lake, :root_path)
     utc_1_date = utc_1_date()
+    aws_enable = Application.get_env(:t_lake, :aws_enable, false)
+
+    options = %{aws_enable: aws_enable}
 
     case :travianmap.get_servers() do
       {:error, _reason} = _error ->
@@ -39,7 +44,9 @@ defmodule TLake.GenLauncher do
 
       {:ok, servers} ->
         server_maps =
-          for {atom, server_map} <- servers, atom == :ok, do: {root_path, utc_1_date, server_map}
+          for {atom, server_map} <- servers,
+              atom == :ok,
+              do: {root_path, utc_1_date, server_map, options}
 
         TLake.TaskProducer.send_bulk_server_maps(Enum.shuffle(server_maps))
 
@@ -48,7 +55,7 @@ defmodule TLake.GenLauncher do
     end
   end
 
-  @spec milis_to_next_launch(launch_time :: Time.t()) :: integer()
+  @spec milis_to_next_launch(launch_time :: Time.t()) :: non_neg_integer()
   def milis_to_next_launch(launch_time) do
     utc_1_now = DateTime.utc_now() |> DateTime.add(@hour_in_milis, :millisecond)
 
@@ -63,13 +70,5 @@ defmodule TLake.GenLauncher do
     DateTime.utc_now()
     |> DateTime.add(@hour_in_milis, :millisecond)
     |> DateTime.to_date()
-  end
-
-  @spec launch_job(root_path :: String.t(), utc_1_date :: Date.t(), server_map :: map()) ::
-          DynamicSupervisor.on_start_child()
-  def launch_job(root_path, utc_1_date, server_map) do
-    Task.Supervisor.start_child(TLake.TaskSupervisor, fn ->
-      TLake.Job.DAG.start(root_path, utc_1_date, server_map)
-    end)
   end
 end

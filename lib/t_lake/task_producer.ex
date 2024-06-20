@@ -1,12 +1,14 @@
 defmodule TLake.TaskProducer do
   use GenStage
 
+  @moduledoc false
+
   @spec start_link(term()) :: GenServer.on_start()
   def start_link(_) do
     GenStage.start_link(__MODULE__, :ok, name: __MODULE__)
   end
 
-  @spec send_bulk_server_maps(server_maps :: [{binary(), Date.t(), map()}]) :: :ok
+  @spec send_bulk_server_maps(server_maps :: [{binary(), Date.t(), map(), map()}]) :: :ok
   def send_bulk_server_maps(server_maps) do
     GenStage.call(__MODULE__, {:bulk_server_maps, server_maps})
   end

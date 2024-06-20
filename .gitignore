@@ -28,3 +28,6 @@ t_lake-*.tar
 # Ignore emacs files
 *~
 \#*\#
+
+# Ignore own config
+/config/shadow_config.exs

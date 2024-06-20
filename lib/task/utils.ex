@@ -2,6 +2,8 @@ defmodule TLake.Job.Utils do
   alias Explorer.Series
   require Explorer.DataFrame, as: DF
 
+  @moduledoc false
+
   @spec gen_server_id(server_url :: String.t(), server_starting_date :: Date.t()) :: binary()
   def gen_server_id(<<"https://", server_url::binary>>, server_starting_date) do
     "#{server_url}_#{Date.to_iso8601(server_starting_date, :basic)}"
@@ -26,7 +28,7 @@ defmodule TLake.Job.Utils do
           server_id :: String.t()
         ) ::
           ({String.t(), Date.t()} | {:aws, String.t(), Date.t()} ->
-             {:ok, FSS.entry()} | {:error, atom()})
+             {:ok, FSS.entry()} | {:error, atom() | Exception.t()})
   def f_filename(root_path, aws_config, server_id) do
     fn
       {:aws, table_name, target_date} ->
@@ -58,7 +60,7 @@ defmodule TLake.Job.Utils do
   end
 
   defp read_parquet(f_filename, table_name, date) do
-    case f_filename.(table_name, date) do
+    case f_filename.({table_name, date}) do
       {:ok, filename} -> DF.from_parquet(filename, lazy: true)
       error -> error
     end

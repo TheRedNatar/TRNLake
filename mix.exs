@@ -9,7 +9,14 @@ defmodule TLake.MixProject do
       start_permanent: Mix.env() == :prod,
       deps: deps(),
       releases: releases(),
-      aliases: aliases()
+      aliases: aliases(),
+      dialyzer: [
+        flags: [:unmatched_returns, :error_handling, :underspecs, :extra_return, :missing_return]
+      ],
+      preferred_cli_env: [
+        "test.reset": :test,
+        "test.integration": :test
+      ]
     ]
   end
 
@@ -23,11 +30,9 @@ defmodule TLake.MixProject do
 
   defp aliases do
     [
-      ci: [
+      lint: [
         "format",
-        "dialyzer",
-        "credo",
-        "test"
+        "dialyzer"
       ]
     ]
   end
@@ -37,12 +42,12 @@ defmodule TLake.MixProject do
     [
       # No runtime deps
       {:dialyxir, ">= 1.4.3", only: [:dev], runtime: false},
-      {:credo, ">= 1.7.6", only: [:dev, :test], runtime: false},
       {:ex_doc, ">= 0.32.2", only: :dev, runtime: false},
       {:propcheck, "~> 1.4", only: [:test, :dev]},
       {:rustler, ">= 0.0.0", runtime: false},
 
       # Runtime deps
+      {:jason, "~> 1.4"},
       {:travianmap, "1.0.0"},
       {:gen_stage, "~> 1.2"},
       {:nx, "0.7.2"},
@@ -54,6 +59,9 @@ defmodule TLake.MixProject do
   defp releases() do
     [
       base: [
+        config_providers: [
+          {Config.Reader, {:system, "RELEASE_ROOT", "/shadow_config.exs"}}
+        ],
         include_executables_for: [:unix]
       ]
     ]
