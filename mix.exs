@@ -59,9 +59,9 @@ defmodule TLake.MixProject do
   defp releases() do
     [
       base: [
-        config_providers: [
-          {Config.Reader, {:system, "RELEASE_ROOT", "/shadow_config.exs"}}
-        ],
+        # config_providers: [
+        #   {Config.Reader, {:system, "RELEASE_ROOT", "/shadow_config.exs"}}
+        # ],
         include_executables_for: [:unix]
       ]
     ]
