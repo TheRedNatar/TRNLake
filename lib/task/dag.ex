@@ -9,7 +9,7 @@ defmodule TLake.Job.DAG do
       secret_access_key: Application.fetch_env!(:t_lake, :aws_secret_access_key)
     }
 
-    kaggle_bin = Application.get_env(:t_lake, :kaggle_bin, "kaggle")
+    kaggle_bin = Application.fetch_env!(:t_lake, :kaggle_bin)
 
     options = Map.merge(options, %{kaggle_bin: kaggle_bin})
 
