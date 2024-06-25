@@ -33,7 +33,7 @@ defmodule TLake.GenLauncher do
   defp launch_and_wait(state) do
     root_path = Application.fetch_env!(:t_lake, :root_path)
     utc_1_date = utc_1_date()
-    aws_enable = Application.get_env(:t_lake, :aws_enable, false)
+    aws_enable = Application.fetch_env!(:t_lake, :aws_enable)
 
     options = %{aws_enable: aws_enable}
 

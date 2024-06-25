@@ -3,7 +3,7 @@ defmodule TLake.Job.RawSnapshotToS3 do
 
   @moduledoc false
 
-  def run(_f_filename, _target_date, _server_id, %{aws_enable: false}) do
+  def run(_f_filename, _target_date, _server_id, %{aws_enable: "false"}) do
     :ok
   end
 

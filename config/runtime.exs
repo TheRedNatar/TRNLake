@@ -1,6 +1,7 @@
 import Config
 
 config :t_lake,
+  aws_enable: System.get_env("TLAKE__AWS_BUCKET", "false"),
   aws_bucket: System.get_env("TLAKE__AWS_BUCKET"),
   aws_region: System.get_env("TLAKE__AWS_REGION"),
   aws_access_key_id: System.get_env("TLAKE__AWS_ACCESS_KEY_ID"),
