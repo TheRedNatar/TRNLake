@@ -49,6 +49,8 @@ defmodule TLake.MixProject do
       # Runtime deps
       {:jason, "~> 1.4"},
       {:travianmap, "1.0.0"},
+      {:htmerl, "0.1.0"},
+      {:thoas, "1.0.0"},
       {:gen_stage, "~> 1.2"},
       {:nx, "0.7.2"},
       # {:exgboost, "0.5.0"},
