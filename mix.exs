@@ -52,7 +52,7 @@ defmodule TLake.MixProject do
       {:htmerl, "0.1.0"},
       {:thoas, "1.0.0"},
       {:gen_stage, "~> 1.2"},
-      {:nx, "0.7.2"},
+      {:nx, "0.7.3"},
       # {:exgboost, "0.5.0"},
       {:explorer, "0.8.2", system_env: %{"EXPLORER_BUILD" => "1"}}
     ]
