@@ -4,7 +4,7 @@ defmodule TLake.MixProject do
   def project do
     [
       app: :t_lake,
-      version: "1.0.0",
+      version: "1.0.1",
       elixir: "~> 1.15",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
@@ -48,9 +48,7 @@ defmodule TLake.MixProject do
 
       # Runtime deps
       {:jason, "~> 1.4"},
-      {:travianmap, "1.0.0"},
-      {:htmerl, "0.1.0"},
-      {:thoas, "1.0.0"},
+      {:travianmap, "1.1.0"},
       {:gen_stage, "~> 1.2"},
       {:nx, "0.7.3"},
       # {:exgboost, "0.5.0"},
@@ -60,7 +58,7 @@ defmodule TLake.MixProject do
 
   defp releases() do
     [
-      base: [
+      t_lake: [
         # config_providers: [
         #   {Config.Reader, {:system, "RELEASE_ROOT", "/shadow_config.exs"}}
         # ],
