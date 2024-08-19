@@ -1,5 +1,6 @@
 defmodule TLake.Job.Utils do
   alias Explorer.Series
+  alias Explorer.DataFrame
   require Explorer.DataFrame, as: DF
 
   @moduledoc false
@@ -64,5 +65,11 @@ defmodule TLake.Job.Utils do
       {:ok, filename} -> DF.from_parquet(filename, lazy: true)
       error -> error
     end
+  end
+
+  @spec is_df_valid?(df :: DataFrame.t()) :: bool()
+  def is_df_valid?(df) do
+    df_c = if DF.lazy?(df), do: DF.collect(df), else: df
+    DF.n_columns(df_c) >= 1 and DF.n_rows(df_c) > 0
   end
 end

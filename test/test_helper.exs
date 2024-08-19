@@ -1,1 +1,1 @@
-ExUnit.start(exclude: :aws)
+ExUnit.start(exclude: :cloud)

@@ -75,7 +75,7 @@ defmodule TLake.Job.Snapshot do
     end
   end
 
-  defp process(df_input) do
+  def process(df_input) do
     df = parse_binary_records(df_input)
 
     df_error =
@@ -93,7 +93,7 @@ defmodule TLake.Job.Snapshot do
   defp parse_binary_record(row) do
     binary_record = Map.fetch!(row, "binary_record")
 
-    case :travianmap_map.parse_line(binary_record) do
+    case :travianmap.parse_line(binary_record) do
       {:ok, new_row} -> Map.merge(row, new_row) |> Map.merge(%{"parse_ok?" => true})
       _ -> Map.merge(row, fake_nil_map()) |> Map.merge(%{"parse_ok?" => false})
     end

@@ -44,6 +44,7 @@ defmodule TLake.MixProject do
       {:dialyxir, ">= 1.4.3", only: [:dev], runtime: false},
       {:ex_doc, ">= 0.32.2", only: :dev, runtime: false},
       {:propcheck, "~> 1.4", only: [:test, :dev]},
+      {:benchee, "~> 1.0", only: :test},
       {:rustler, ">= 0.0.0", runtime: false},
 
       # Runtime deps

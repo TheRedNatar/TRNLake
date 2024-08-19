@@ -18,7 +18,7 @@ defmodule TLake.GenLauncher do
 
   @impl true
   def handle_continue(:init_start, state) do
-    launch_and_wait(state)
+    launch_on_init(state)
   end
 
   @impl true
@@ -28,6 +28,17 @@ defmodule TLake.GenLauncher do
 
   def handle_info(_msg, state) do
     {:noreply, state}
+  end
+
+  defp launch_on_init(state) do
+    case Application.fetch_env!(:t_lake, :collect_on_start?) do
+      true ->
+        launch_and_wait(state)
+
+      false ->
+        tref = :erlang.send_after(milis_to_next_launch(@launch_time), self(), :launch_now)
+        {:noreply, %{state | tref: tref}}
+    end
   end
 
   defp launch_and_wait(state) do
