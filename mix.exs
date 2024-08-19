@@ -50,7 +50,7 @@ defmodule TLake.MixProject do
       {:jason, "~> 1.4"},
       {:travianmap, "1.1.0"},
       {:gen_stage, "~> 1.2"},
-      {:nx, "0.7.3"},
+      {:nx, "0.8.0"},
       # {:exgboost, "0.5.0"},
       {:explorer, "0.9.0", system_env: %{"EXPLORER_BUILD" => "1"}}
     ]
