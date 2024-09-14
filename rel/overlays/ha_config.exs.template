@@ -1,0 +1,8 @@
+import Config
+
+config :kernel,
+  distributed: [
+    {:t_lake, 10_000, [:user1@node1, :user2@node2]}
+  ],
+  sync_nodes_mandatory: [:user1@node1, :user2@node2],
+  sync_nodes_timeout: 30_000

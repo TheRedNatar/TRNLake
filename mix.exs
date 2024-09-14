@@ -60,9 +60,12 @@ defmodule TLake.MixProject do
   defp releases() do
     [
       t_lake: [
-        # config_providers: [
-        #   {Config.Reader, {:system, "RELEASE_ROOT", "/shadow_config.exs"}}
-        # ],
+        config_providers: [
+          {Config.Reader,
+	   path: {:system, "RELEASE_ROOT", "/ha_config.exs"},
+	   env: :prod,
+	   imports: :disabled}
+        ],
         include_executables_for: [:unix]
       ]
     ]
