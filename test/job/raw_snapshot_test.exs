@@ -61,7 +61,6 @@ defmodule TLake.Job.RawSnapshotTest do
              )
   end
 
-
   test "raw_snapshot__process__validated__input", %{test: test_name} do
     <<"test ", name::binary>> = :erlang.atom_to_binary(test_name)
     target_date = ~D[2024-05-29]
@@ -73,10 +72,10 @@ defmodule TLake.Job.RawSnapshotTest do
     raw_snapshot = File.read!(input_path)
     df_expected_output = DF.from_parquet!(expected_output_path)
 
-    df_outptut = TLake.Job.RawSnapshot.process(raw_snapshot, server_id(), target_date, server_map())
+    df_outptut =
+      TLake.Job.RawSnapshot.process(raw_snapshot, server_id(), target_date, server_map())
 
-
-    #DF.to_parquet!(df_outptut, expected_output_path, compression: {:brotli, 11})
+    # DF.to_parquet!(df_outptut, expected_output_path, compression: {:brotli, 11})
 
     f = fn df -> DF.sort_by(df, binary_record) |> DF.to_rows() end
 
