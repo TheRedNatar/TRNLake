@@ -40,6 +40,6 @@ jobs:
     - name: Run compiler
       run: mix compile --warnings-as-errors
     - name: Run Dialyzer
-      run: dialyzer
+      run: dialyzer --build_plt
     - name: Run tests
       run: mix test
