@@ -60,10 +60,10 @@ defmodule TLake.MixProject do
   defp releases() do
     [
       t_lake: [
-	reboot_system_after_config: true,
+        reboot_system_after_config: true,
         config_providers: [
           {Config.Reader,
-	   path: {:system, "RELEASE_ROOT", "/ha_config.exs"}, env: :prod, imports: :disabled}
+           path: {:system, "RELEASE_ROOT", "/ha_config.exs"}, env: :prod, imports: :disabled}
         ],
         include_executables_for: [:unix]
       ]
