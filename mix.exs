@@ -53,7 +53,7 @@ defmodule TLake.MixProject do
       {:gen_stage, "~> 1.2"},
       {:nx, "0.7.3"},
       # {:exgboost, "0.5.0"},
-      {:explorer, "0.9.0", system_env: %{"EXPLORER_BUILD" => "1"}}
+      {:explorer, "0.10.0", system_env: %{"EXPLORER_BUILD" => "1"}}
     ]
   end
 
